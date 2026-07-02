@@ -54,3 +54,15 @@ export async function deleteClothingItem(id: string) {
   const { error } = await supabase.from("clothing_items").delete().eq("id", id);
   if (error) throw error;
 }
+
+// Ucitaj jedan predmet po ID-u
+export async function getClothingItemById(id: string) {
+  const { data, error } = await supabase
+    .from("clothing_items")
+    .select("*")
+    .eq("id", id)
+    .single();
+
+  if (error) throw error;
+  return data as ClothingItem;
+}

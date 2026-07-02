@@ -88,7 +88,10 @@ export default function WardrobeScreen() {
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
         renderItem={({ item }) => (
-          <View style={styles.card}>
+          <Pressable
+            style={styles.card}
+            onPress={() => router.push(`/item-detail?id=${item.id}`)}
+          >
             {item.image_url ? (
               <Image source={{ uri: item.image_url }} style={styles.image} />
             ) : (
@@ -100,7 +103,7 @@ export default function WardrobeScreen() {
             <ThemedText style={styles.itemCategory}>
               {item.kategorija}
             </ThemedText>
-          </View>
+          </Pressable>
         )}
       />
     );

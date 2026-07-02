@@ -1,28 +1,54 @@
 import * as ImagePicker from "expo-image-picker";
-import { router } from "expo-router";
-import { useState } from "react";
+import { router, useLocalSearchParams } from "expo-router";
+import { useEffect, useState } from "react";
 import {
-    ActivityIndicator,
-    Alert,
-    Image,
-    Pressable,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    View,
+  ActivityIndicator,
+  Alert,
+  Image,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
 } from "react-native";
-import { addClothingItem } from "../services/clothing";
+import {
+  addClothingItem,
+  getClothingItemById,
+  updateClothingItem,
+} from "../services/clothing";
 import { uploadClothingImage } from "../services/storage";
 
-const KATEGORIJE = ["Tops", "Bottoms", "Shoes", "Dresses", "Accessories"];
+const KATEGORIJE = ["Tops", "Bottoms", "Shoes", "Dresses"];
 
 export default function AddItemScreen() {
+  const { id } = useLocalSearchParams<{ id?: string }>();
+  const isEditMode = !!id;
+
   const [imageUri, setImageUri] = useState<string | null>(null);
+  const [existingImageUrl, setExistingImageUrl] = useState<string | null>(null);
   const [naziv, setNaziv] = useState("");
   const [kategorija, setKategorija] = useState("");
   const [sezona, setSezona] = useState("");
   const [saving, setSaving] = useState(false);
+  const [loadingItem, setLoadingItem] = useState(isEditMode);
+
+  // Ako smo u edit rezimu, ucitaj postojece podatke predmeta
+  useEffect(() => {
+    if (!id) return;
+    getClothingItemById(id)
+      .then((item) => {
+        setNaziv(item.naziv);
+        setKategorija(item.kategorija);
+        setSezona(item.sezona ?? "");
+        setExistingImageUrl(item.image_url ?? null);
+      })
+      .catch((err) => {
+        Alert.alert("Greška", err.message ?? "Predmet nije pronađen.");
+        router.back();
+      })
+      .finally(() => setLoadingItem(false));
+  }, [id]);
 
   const pickImage = async () => {
     const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -52,17 +78,26 @@ export default function AddItemScreen() {
 
     setSaving(true);
     try {
-      let image_url: string | undefined;
+      let image_url = existingImageUrl ?? undefined;
       if (imageUri) {
         image_url = await uploadClothingImage(imageUri);
       }
 
-      await addClothingItem({
-        naziv: naziv.trim(),
-        kategorija: kategorija.trim(),
-        sezona: sezona.trim() || undefined,
-        image_url,
-      });
+      if (isEditMode && id) {
+        await updateClothingItem(id, {
+          naziv: naziv.trim(),
+          kategorija: kategorija.trim(),
+          sezona: sezona.trim() || undefined,
+          image_url,
+        });
+      } else {
+        await addClothingItem({
+          naziv: naziv.trim(),
+          kategorija: kategorija.trim(),
+          sezona: sezona.trim() || undefined,
+          image_url,
+        });
+      }
 
       router.back();
     } catch (err: any) {
@@ -72,13 +107,25 @@ export default function AddItemScreen() {
     }
   };
 
+  if (loadingItem) {
+    return (
+      <View style={styles.centered}>
+        <ActivityIndicator size="large" />
+      </View>
+    );
+  }
+
+  const displayImage = imageUri ?? existingImageUrl;
+
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      <Text style={styles.title}>New piece</Text>
+      <Text style={styles.title}>
+        {isEditMode ? "Izmeni predmet" : "New piece"}
+      </Text>
 
       <Pressable style={styles.photoButton} onPress={pickImage}>
-        {imageUri ? (
-          <Image source={{ uri: imageUri }} style={styles.preview} />
+        {displayImage ? (
+          <Image source={{ uri: displayImage }} style={styles.preview} />
         ) : (
           <Text style={styles.photoButtonText}>Add photo</Text>
         )}
@@ -129,7 +176,9 @@ export default function AddItemScreen() {
         {saving ? (
           <ActivityIndicator color="#fff" />
         ) : (
-          <Text style={styles.saveButtonText}>Save item</Text>
+          <Text style={styles.saveButtonText}>
+            {isEditMode ? "Sačuvaj izmene" : "Save item"}
+          </Text>
         )}
       </Pressable>
     </ScrollView>
@@ -137,6 +186,7 @@ export default function AddItemScreen() {
 }
 
 const styles = StyleSheet.create({
+  centered: { flex: 1, justifyContent: "center", alignItems: "center" },
   container: { padding: 20, paddingBottom: 40 },
   title: {
     fontSize: 22,
