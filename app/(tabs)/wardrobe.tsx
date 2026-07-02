@@ -1,6 +1,6 @@
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
-import { router, useFocusEffect } from "expo-router";
+import { router, useFocusEffect, useLocalSearchParams } from "expo-router";
 import { useCallback, useState } from "react";
 import {
   ActivityIndicator,
@@ -20,6 +20,15 @@ export default function WardrobeScreen() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { search } = useLocalSearchParams<{ search?: string }>();
+
+  const filteredItems = search
+    ? items.filter(
+        (item) =>
+          item.naziv.toLowerCase().includes(search.toLowerCase()) ||
+          item.kategorija.toLowerCase().includes(search.toLowerCase()),
+      )
+    : items;
 
   const loadItems = async () => {
     try {
@@ -65,22 +74,24 @@ export default function WardrobeScreen() {
       );
     }
 
-    if (items.length === 0) {
+    if (filteredItems.length === 0) {
       return (
         <ThemedView style={styles.centered}>
           <ThemedText style={styles.emptyText}>
-            Tvoj orman je prazan.
+            {search ? `Nema rezultata za "${search}"` : "Tvoj orman je prazan."}
           </ThemedText>
-          <ThemedText style={styles.emptySubtext}>
-            Dodaj prvi odevni predmet.
-          </ThemedText>
+          {!search && (
+            <ThemedText style={styles.emptySubtext}>
+              Dodaj prvi odevni predmet.
+            </ThemedText>
+          )}
         </ThemedView>
       );
     }
 
     return (
       <FlatList
-        data={items}
+        data={filteredItems}
         keyExtractor={(item) => item.id}
         numColumns={2}
         contentContainerStyle={styles.list}
