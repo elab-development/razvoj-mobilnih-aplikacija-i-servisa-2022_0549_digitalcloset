@@ -17,6 +17,7 @@ import {
   getClothingItemById,
   updateClothingItem,
 } from "../services/clothing";
+import { sendInstantNotification } from "../services/notifications";
 import { uploadClothingImage } from "../services/storage";
 
 const KATEGORIJE = ["Tops", "Bottoms", "Shoes", "Dresses"];
@@ -90,6 +91,10 @@ export default function AddItemScreen() {
           sezona: sezona.trim() || undefined,
           image_url,
         });
+        await sendInstantNotification(
+          "Izmenjeno! ✅",
+          `"${naziv.trim()}" je uspešno ažuriran.`,
+        );
       } else {
         await addClothingItem({
           naziv: naziv.trim(),
@@ -97,6 +102,10 @@ export default function AddItemScreen() {
           sezona: sezona.trim() || undefined,
           image_url,
         });
+        await sendInstantNotification(
+          "Dodato! ✅",
+          `"${naziv.trim()}" je dodat u tvoj orman.`,
+        );
       }
 
       router.back();
