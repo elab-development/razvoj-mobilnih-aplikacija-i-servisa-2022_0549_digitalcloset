@@ -1,5 +1,6 @@
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
+import { getLikedItems } from "@/services/clothing";
 import {
   cancelAllReminders,
   requestNotificationPermission,
@@ -8,7 +9,7 @@ import {
 import { getMyProfile, getMyStats, updateMyProfile } from "@/services/profile";
 import { supabase } from "@/services/supabase";
 import { Profile } from "@/types/database";
-import { useFocusEffect } from "expo-router";
+import { router, useFocusEffect } from "expo-router";
 import { useCallback, useState } from "react";
 import {
   ActivityIndicator,
@@ -22,7 +23,11 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function ProfileScreen() {
   const [profile, setProfile] = useState<Profile | null>(null);
-  const [stats, setStats] = useState({ clothingCount: 0, outfitsCount: 0 });
+  const [stats, setStats] = useState({
+    clothingCount: 0,
+    outfitsCount: 0,
+    likedCount: 0,
+  });
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(false);
   const [ime, setIme] = useState("");
@@ -33,12 +38,12 @@ export default function ProfileScreen() {
   useFocusEffect(
     useCallback(() => {
       setLoading(true);
-      Promise.all([getMyProfile(), getMyStats()])
-        .then(([profileData, statsData]) => {
+      Promise.all([getMyProfile(), getMyStats(), getLikedItems()])
+        .then(([profileData, statsData, likedItems]) => {
           setProfile(profileData);
           setIme(profileData.ime ?? "");
           setLokacija(profileData.lokacija ?? "");
-          setStats(statsData);
+          setStats({ ...statsData, likedCount: likedItems.length });
         })
         .catch((err) =>
           Alert.alert("Greška", err.message ?? "Greška pri učitavanju profila"),
@@ -164,6 +169,15 @@ export default function ProfileScreen() {
           </ThemedText>
           <ThemedText style={styles.statLabel}>Autfiti</ThemedText>
         </ThemedView>
+        <Pressable
+          style={styles.statCard}
+          onPress={() => router.push("/liked-items")}
+        >
+          <ThemedText style={styles.statNumber}>
+            ❤️ {stats.likedCount}
+          </ThemedText>
+          <ThemedText style={styles.statLabel}>Omiljeno</ThemedText>
+        </Pressable>
       </ThemedView>
 
       <ThemedView style={styles.row}>

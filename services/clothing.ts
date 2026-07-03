@@ -66,3 +66,27 @@ export async function getClothingItemById(id: string) {
   if (error) throw error;
   return data as ClothingItem;
 }
+// Ucitaj samo omiljene predmete
+export async function getLikedItems() {
+  const { data, error } = await supabase
+    .from("clothing_items")
+    .select("*")
+    .eq("omiljeno", true)
+    .order("created_at", { ascending: false });
+
+  if (error) throw error;
+  return data as ClothingItem[];
+}
+
+// Prebaci status omiljenog (true/false)
+export async function toggleLiked(id: string, currentValue: boolean) {
+  const { data, error } = await supabase
+    .from("clothing_items")
+    .update({ omiljeno: !currentValue })
+    .eq("id", id)
+    .select()
+    .single();
+
+  if (error) throw error;
+  return data as ClothingItem;
+}

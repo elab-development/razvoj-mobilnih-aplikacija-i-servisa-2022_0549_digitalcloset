@@ -12,7 +12,7 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { getClothingItems } from "../../services/clothing";
+import { getClothingItems, toggleLiked } from "../../services/clothing";
 import { ClothingItem } from "../../types/database";
 
 export default function WardrobeScreen() {
@@ -53,6 +53,14 @@ export default function WardrobeScreen() {
     setRefreshing(true);
     loadItems();
   }, []);
+  const handleToggleLike = async (item: ClothingItem) => {
+    try {
+      const updated = await toggleLiked(item.id, item.omiljeno);
+      setItems((prev) => prev.map((i) => (i.id === updated.id ? updated : i)));
+    } catch (err: any) {
+      console.log("Greška pri lajkovanju:", err.message);
+    }
+  };
 
   const renderContent = () => {
     if (loading) {
@@ -103,13 +111,24 @@ export default function WardrobeScreen() {
             style={styles.card}
             onPress={() => router.push(`/item-detail?id=${item.id}`)}
           >
-            {item.image_url ? (
-              <Image source={{ uri: item.image_url }} style={styles.image} />
-            ) : (
-              <View style={[styles.image, styles.imagePlaceholder]}>
-                <ThemedText>Bez slike</ThemedText>
-              </View>
-            )}
+            <View style={styles.imageWrapper}>
+              {item.image_url ? (
+                <Image source={{ uri: item.image_url }} style={styles.image} />
+              ) : (
+                <View style={[styles.image, styles.imagePlaceholder]}>
+                  <ThemedText>Bez slike</ThemedText>
+                </View>
+              )}
+              <Pressable
+                style={styles.heartButton}
+                onPress={() => handleToggleLike(item)}
+                hitSlop={8}
+              >
+                <ThemedText style={styles.heartIcon}>
+                  {item.omiljeno ? "❤️" : "🤍"}
+                </ThemedText>
+              </Pressable>
+            </View>
             <ThemedText style={styles.itemName}>{item.naziv}</ThemedText>
             <ThemedText style={styles.itemCategory}>
               {item.kategorija}
@@ -187,4 +206,17 @@ const styles = StyleSheet.create({
     lineHeight: 30,
     fontWeight: "600",
   },
+  imageWrapper: { position: "relative" },
+  heartButton: {
+    position: "absolute",
+    top: 4,
+    right: 4,
+    backgroundColor: "rgba(0,0,0,0.35)",
+    borderRadius: 14,
+    width: 28,
+    height: 28,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  heartIcon: { fontSize: 14 },
 });

@@ -16,6 +16,7 @@ export type ClothingItem = {
   sezona: string | null;
   image_url: string | null;
   broj_nosenja: number;
+  omiljeno: boolean;
   created_at: string;
 };
 

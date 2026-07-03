@@ -3,14 +3,18 @@ import { ThemedView } from "@/components/themed-view";
 import { router, useFocusEffect, useLocalSearchParams } from "expo-router";
 import { useCallback, useState } from "react";
 import {
-    ActivityIndicator,
-    Alert,
-    Image,
-    Pressable,
-    StyleSheet,
+  ActivityIndicator,
+  Alert,
+  Image,
+  Pressable,
+  StyleSheet,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { deleteClothingItem, getClothingItemById } from "../services/clothing";
+import {
+  deleteClothingItem,
+  getClothingItemById,
+  toggleLiked,
+} from "../services/clothing";
 import { ClothingItem } from "../types/database";
 
 export default function ItemDetailScreen() {
@@ -52,6 +56,15 @@ export default function ItemDetailScreen() {
       ],
     );
   };
+  const handleToggleLike = async () => {
+    if (!item) return;
+    try {
+      const updated = await toggleLiked(item.id, item.omiljeno);
+      setItem(updated);
+    } catch (err: any) {
+      Alert.alert("Greška", err.message ?? "Nešto nije uspelo.");
+    }
+  };
 
   if (loading) {
     return (
@@ -75,6 +88,11 @@ export default function ItemDetailScreen() {
     <SafeAreaView style={styles.screen} edges={["top"]}>
       <Pressable onPress={() => router.back()} style={styles.backButton}>
         <ThemedText style={styles.backButtonText}>{"< Nazad"}</ThemedText>
+      </Pressable>
+      <Pressable style={styles.likeButton} onPress={handleToggleLike}>
+        <ThemedText style={styles.likeIcon}>
+          {item.omiljeno ? "❤️" : "🤍"}
+        </ThemedText>
       </Pressable>
 
       {item.image_url ? (
@@ -161,4 +179,14 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontWeight: "700",
   },
+  likeButton: {
+    position: "absolute",
+    top: 16,
+    right: 16,
+    zIndex: 10,
+    backgroundColor: "rgba(0,0,0,0.3)",
+    borderRadius: 20,
+    padding: 8,
+  },
+  likeIcon: { fontSize: 22 },
 });
