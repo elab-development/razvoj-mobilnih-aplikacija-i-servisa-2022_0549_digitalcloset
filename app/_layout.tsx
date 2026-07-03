@@ -5,9 +5,13 @@ import {
 } from "@react-navigation/native";
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
-import { ActivityIndicator, View } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 import "react-native-reanimated";
 
+import {
+  OnboardingProvider,
+  useOnboarding,
+} from "@/contexts/OnboardingContext";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -16,13 +20,23 @@ export const unstable_settings = {
 };
 
 export default function RootLayout() {
-  const colorScheme = useColorScheme();
-  const { loading, isLoggedIn } = useAuth();
+  return (
+    <OnboardingProvider>
+      <RootLayoutNav />
+    </OnboardingProvider>
+  );
+}
 
-  if (loading) {
+function RootLayoutNav() {
+  const colorScheme = useColorScheme();
+  const { loading: authLoading, isLoggedIn } = useAuth();
+  const { hasSeenOnboarding } = useOnboarding();
+
+  if (authLoading || hasSeenOnboarding === null) {
     return (
-      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-        <ActivityIndicator size="large" />
+      <View style={styles.splash}>
+        <Text style={styles.splashEmoji}>👗</Text>
+        <Text style={styles.splashTitle}>Digitalni Orman</Text>
       </View>
     );
   }
@@ -30,7 +44,11 @@ export default function RootLayout() {
   return (
     <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
       <Stack>
-        <Stack.Protected guard={isLoggedIn}>
+        <Stack.Protected guard={!hasSeenOnboarding}>
+          <Stack.Screen name="onboarding" options={{ headerShown: false }} />
+        </Stack.Protected>
+
+        <Stack.Protected guard={hasSeenOnboarding && isLoggedIn}>
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
           <Stack.Screen
             name="modal"
@@ -38,7 +56,7 @@ export default function RootLayout() {
           />
         </Stack.Protected>
 
-        <Stack.Protected guard={!isLoggedIn}>
+        <Stack.Protected guard={hasSeenOnboarding && !isLoggedIn}>
           <Stack.Screen name="(auth)" options={{ headerShown: false }} />
         </Stack.Protected>
       </Stack>
@@ -46,3 +64,14 @@ export default function RootLayout() {
     </ThemeProvider>
   );
 }
+
+const styles = StyleSheet.create({
+  splash: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#3a2a25",
+  },
+  splashEmoji: { fontSize: 64, marginBottom: 12 },
+  splashTitle: { fontSize: 22, fontWeight: "700", color: "#fff" },
+});

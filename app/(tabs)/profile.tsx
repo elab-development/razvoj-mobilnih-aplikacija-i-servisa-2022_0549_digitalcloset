@@ -9,6 +9,7 @@ import {
 import { getMyProfile, getMyStats, updateMyProfile } from "@/services/profile";
 import { supabase } from "@/services/supabase";
 import { Profile } from "@/types/database";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { router, useFocusEffect } from "expo-router";
 import { useCallback, useState } from "react";
 import {
@@ -155,7 +156,6 @@ export default function ProfileScreen() {
           </>
         )}
       </ThemedView>
-
       <ThemedView style={styles.statsRow}>
         <ThemedView style={styles.statCard}>
           <ThemedText style={styles.statNumber}>
@@ -179,14 +179,16 @@ export default function ProfileScreen() {
           <ThemedText style={styles.statLabel}>Omiljeno</ThemedText>
         </Pressable>
       </ThemedView>
-
       <ThemedView style={styles.row}>
         <ThemedText style={styles.rowLabel}>Dnevni podsetnik (20h)</ThemedText>
         <Switch value={remindersOn} onValueChange={handleToggleReminders} />
       </ThemedView>
-
       <Pressable style={styles.logoutButton} onPress={handleLogout}>
         <ThemedText style={styles.logoutButtonText}>Odjavi se</ThemedText>
+      </Pressable>
+
+      <Pressable onPress={() => AsyncStorage.removeItem("hasSeenOnboarding")}>
+        <ThemedText>[DEV] Resetuj onboarding</ThemedText>
       </Pressable>
     </SafeAreaView>
   );
