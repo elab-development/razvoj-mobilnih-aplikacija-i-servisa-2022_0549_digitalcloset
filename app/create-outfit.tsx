@@ -3,22 +3,19 @@ import DateTimePicker from "@react-native-community/datetimepicker";
 import { router } from "expo-router";
 import { useEffect, useState } from "react";
 import {
-    ActivityIndicator,
-    Alert,
-    FlatList,
-    Image,
-    Pressable,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    View,
+  ActivityIndicator,
+  Alert,
+  Image,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  TextInput,
+  View,
 } from "react-native";
-import { getClothingItems } from "../services/clothing";
+import { getClothingItems, groupByCategory } from "../services/clothing";
 import { addItemToOutfit, createOutfit } from "../services/outfits";
 import { ClothingItem } from "../types/database";
 
-// Pomocna funkcija - danasnji datum u formatu YYYY-MM-DD
 function todayString() {
   const d = new Date();
   return d.toISOString().split("T")[0];
@@ -26,6 +23,7 @@ function todayString() {
 
 export default function CreateOutfitScreen() {
   const [datum, setDatum] = useState(todayString());
+  const [showDatePicker, setShowDatePicker] = useState(false);
   const [naziv, setNaziv] = useState("");
   const [napomena, setNapomena] = useState("");
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
@@ -33,7 +31,6 @@ export default function CreateOutfitScreen() {
   const [clothingItems, setClothingItems] = useState<ClothingItem[]>([]);
   const [loadingItems, setLoadingItems] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [showDatePicker, setShowDatePicker] = useState(false);
 
   useEffect(() => {
     getClothingItems()
@@ -68,7 +65,6 @@ export default function CreateOutfitScreen() {
         napomena: napomena.trim() || undefined,
       });
 
-      // Dodaj sve izabrane komade odece u autfit
       await Promise.all(
         selectedIds.map((clothingId) => addItemToOutfit(outfit.id, clothingId)),
       );
@@ -88,6 +84,9 @@ export default function CreateOutfitScreen() {
       </View>
     );
   }
+
+  const grouped = groupByCategory(clothingItems);
+  const categories = Object.keys(grouped);
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
@@ -138,41 +137,49 @@ export default function CreateOutfitScreen() {
       </ThemedText>
 
       {clothingItems.length === 0 ? (
-        <Text style={styles.emptyText}>
+        <ThemedText style={styles.emptyText}>
           Orman je prazan — dodaj prvo neku odeću u "Moj orman".
-        </Text>
+        </ThemedText>
       ) : (
-        <FlatList
-          data={clothingItems}
-          keyExtractor={(item) => item.id}
-          numColumns={3}
-          scrollEnabled={false}
-          contentContainerStyle={styles.grid}
-          renderItem={({ item }) => {
-            const isSelected = selectedIds.includes(item.id);
-            return (
-              <Pressable
-                style={[styles.itemCard, isSelected && styles.itemCardSelected]}
-                onPress={() => toggleSelect(item.id)}
-              >
-                {item.image_url ? (
-                  <Image
-                    source={{ uri: item.image_url }}
-                    style={styles.itemImage}
-                  />
-                ) : (
-                  <View style={[styles.itemImage, styles.itemImagePlaceholder]}>
-                    <Text style={{ fontSize: 10 }}>Bez slike</Text>
-                  </View>
-                )}
-                <Text numberOfLines={1} style={styles.itemName}>
-                  {item.naziv}
-                </Text>
-                {isSelected && <View style={styles.checkmark} />}
-              </Pressable>
-            );
-          }}
-        />
+        categories.map((category) => (
+          <View key={category} style={styles.categorySection}>
+            <ThemedText style={styles.categoryTitle}>{category}</ThemedText>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+              {grouped[category].map((item) => {
+                const isSelected = selectedIds.includes(item.id);
+                return (
+                  <Pressable
+                    key={item.id}
+                    style={[
+                      styles.itemCard,
+                      isSelected && styles.itemCardSelected,
+                    ]}
+                    onPress={() => toggleSelect(item.id)}
+                  >
+                    {item.image_url ? (
+                      <Image
+                        source={{ uri: item.image_url }}
+                        style={styles.itemImage}
+                      />
+                    ) : (
+                      <View
+                        style={[styles.itemImage, styles.itemImagePlaceholder]}
+                      >
+                        <ThemedText style={{ fontSize: 10 }}>
+                          Bez slike
+                        </ThemedText>
+                      </View>
+                    )}
+                    <ThemedText numberOfLines={1} style={styles.itemName}>
+                      {item.naziv}
+                    </ThemedText>
+                    {isSelected && <View style={styles.checkmark} />}
+                  </Pressable>
+                );
+              })}
+            </ScrollView>
+          </View>
+        ))
       )}
 
       <Pressable
@@ -183,7 +190,7 @@ export default function CreateOutfitScreen() {
         {saving ? (
           <ActivityIndicator color="#fff" />
         ) : (
-          <Text style={styles.saveButtonText}>Sačuvaj autfit</Text>
+          <ThemedText style={styles.saveButtonText}>Sačuvaj autfit</ThemedText>
         )}
       </Pressable>
     </ScrollView>
@@ -217,19 +224,16 @@ const styles = StyleSheet.create({
     marginBottom: 4,
     backgroundColor: "#fff",
   },
-  dateButtonText: {
-    color: "#000",
-    fontSize: 16,
-  },
+  dateButtonText: { color: "#000", fontSize: 16 },
   emptyText: { color: "#888", marginTop: 8 },
-  grid: { marginTop: 8 },
+  categorySection: { marginTop: 14 },
+  categoryTitle: { fontSize: 15, fontWeight: "700", marginBottom: 8 },
   itemCard: {
-    flex: 1,
-    margin: 4,
+    width: 100,
+    marginRight: 10,
     padding: 6,
     borderRadius: 10,
     backgroundColor: "#f5f5f5",
-    maxWidth: "31%",
     borderWidth: 2,
     borderColor: "transparent",
     position: "relative",
@@ -237,7 +241,7 @@ const styles = StyleSheet.create({
   itemCardSelected: {
     borderColor: "#3a2a25",
   },
-  itemImage: { width: "100%", height: 70, borderRadius: 6, marginBottom: 4 },
+  itemImage: { width: "100%", height: 90, borderRadius: 6, marginBottom: 4 },
   itemImagePlaceholder: {
     backgroundColor: "#ddd",
     justifyContent: "center",

@@ -1,3 +1,4 @@
+import { ThemedText } from "@/components/themed-text";
 import * as ImagePicker from "expo-image-picker";
 import { router, useLocalSearchParams } from "expo-router";
 import { useEffect, useState } from "react";
@@ -8,9 +9,8 @@ import {
   Pressable,
   ScrollView,
   StyleSheet,
-  Text,
   TextInput,
-  View,
+  View
 } from "react-native";
 import {
   addClothingItem,
@@ -20,7 +20,13 @@ import {
 import { sendInstantNotification } from "../services/notifications";
 import { uploadClothingImage } from "../services/storage";
 
-const KATEGORIJE = ["Tops", "Bottoms", "Shoes", "Dresses"];
+const KATEGORIJE = ["Tops", "Bottoms", "Shoes", "Dresses", "Accessories"];
+const SEZONE = [
+  { value: "Zima", label: "Zima" },
+  { value: "Prolece/Jesen", label: "Proleće/Jesen" },
+  { value: "Leto", label: "Leto" },
+  { value: "Sve sezone", label: "Sve sezone" },
+];
 
 export default function AddItemScreen() {
   const { id } = useLocalSearchParams<{ id?: string }>();
@@ -51,7 +57,7 @@ export default function AddItemScreen() {
       .finally(() => setLoadingItem(false));
   }, [id]);
 
-  const pickImage = async () => {
+  const pickFromGallery = async () => {
     const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (!permission.granted) {
       Alert.alert(
@@ -69,6 +75,30 @@ export default function AddItemScreen() {
     if (!result.canceled) {
       setImageUri(result.assets[0].uri);
     }
+  };
+
+  const takePhoto = async () => {
+    const permission = await ImagePicker.requestCameraPermissionsAsync();
+    if (!permission.granted) {
+      Alert.alert("Potrebna dozvola", "Dozvoli pristup kameri da bi slikala.");
+      return;
+    }
+
+    const result = await ImagePicker.launchCameraAsync({
+      quality: 0.7,
+    });
+
+    if (!result.canceled) {
+      setImageUri(result.assets[0].uri);
+    }
+  };
+
+  const pickImage = () => {
+    Alert.alert("Dodaj sliku", "Izaberi opciju", [
+      { text: "Slikaj", onPress: takePhoto },
+      { text: "Izaberi iz galerije", onPress: pickFromGallery },
+      { text: "Otkaži", style: "cancel" },
+    ]);
   };
 
   const handleSave = async () => {
@@ -128,19 +158,19 @@ export default function AddItemScreen() {
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      <Text style={styles.title}>
+      <ThemedText style={styles.title}>
         {isEditMode ? "Izmeni predmet" : "New piece"}
-      </Text>
+      </ThemedText>
 
       <Pressable style={styles.photoButton} onPress={pickImage}>
         {displayImage ? (
           <Image source={{ uri: displayImage }} style={styles.preview} />
         ) : (
-          <Text style={styles.photoButtonText}>Add photo</Text>
+          <ThemedText style={styles.photoButtonText}>Add photo</ThemedText>
         )}
       </Pressable>
 
-      <Text style={styles.label}>Item name</Text>
+      <ThemedText style={styles.label}>Item name</ThemedText>
       <TextInput
         style={styles.input}
         placeholder="Item name"
@@ -149,7 +179,7 @@ export default function AddItemScreen() {
         onChangeText={setNaziv}
       />
 
-      <Text style={styles.label}>Category</Text>
+      <ThemedText style={styles.label}>Category</ThemedText>
       <View style={styles.chipRow}>
         {KATEGORIJE.map((kat) => (
           <Pressable
@@ -157,25 +187,35 @@ export default function AddItemScreen() {
             style={[styles.chip, kategorija === kat && styles.chipActive]}
             onPress={() => setKategorija(kat)}
           >
-            <Text
+            <ThemedText
               style={
                 kategorija === kat ? styles.chipTextActive : styles.chipText
               }
             >
               {kat}
-            </Text>
+            </ThemedText>
           </Pressable>
         ))}
       </View>
 
-      <Text style={styles.label}>Season (opciono)</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="npr. Leto, Zima, Sve sezone"
-        placeholderTextColor="#888"
-        value={sezona}
-        onChangeText={setSezona}
-      />
+      <ThemedText style={styles.label}>Sezona (opciono)</ThemedText>
+      <View style={styles.chipRow}>
+        {SEZONE.map((s) => (
+          <Pressable
+            key={s.value}
+            style={[styles.chip, sezona === s.value && styles.chipActive]}
+            onPress={() => setSezona(sezona === s.value ? "" : s.value)}
+          >
+            <ThemedText
+              style={
+                sezona === s.value ? styles.chipTextActive : styles.chipText
+              }
+            >
+              {s.label}
+            </ThemedText>
+          </Pressable>
+        ))}
+      </View>
 
       <Pressable
         style={styles.saveButton}
@@ -185,9 +225,9 @@ export default function AddItemScreen() {
         {saving ? (
           <ActivityIndicator color="#fff" />
         ) : (
-          <Text style={styles.saveButtonText}>
+          <ThemedText style={styles.saveButtonText}>
             {isEditMode ? "Sačuvaj izmene" : "Save item"}
-          </Text>
+          </ThemedText>
         )}
       </Pressable>
     </ScrollView>

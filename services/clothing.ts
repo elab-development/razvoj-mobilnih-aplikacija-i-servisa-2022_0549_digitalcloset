@@ -90,3 +90,28 @@ export async function toggleLiked(id: string, currentValue: boolean) {
   if (error) throw error;
   return data as ClothingItem;
 }
+// Grupise listu odece po kategoriji - vraca objekat { kategorija: [predmeti] }
+export function groupByCategory(
+  items: ClothingItem[],
+): Record<string, ClothingItem[]> {
+  return items.reduce(
+    (groups, item) => {
+      const key = item.kategorija || "Ostalo";
+      if (!groups[key]) groups[key] = [];
+      groups[key].push(item);
+      return groups;
+    },
+    {} as Record<string, ClothingItem[]>,
+  );
+}
+// Vraca predmete koji odgovaraju datim sezonama (ili su oznaceni "Sve sezone")
+export async function getSuggestedItems(matchingSeasons: string[]) {
+  const items = await getClothingItems();
+
+  return items.filter((item) => {
+    if (!item.sezona) return false;
+    const normalized = item.sezona.trim().toLowerCase();
+    if (normalized === "sve sezone") return true;
+    return matchingSeasons.some((s) => s.toLowerCase() === normalized);
+  });
+}

@@ -1,20 +1,22 @@
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
 import { useWeather } from "@/hooks/useWeather";
-import { describeWeatherCode, getWeatherEmoji } from "@/services/weather";
+import { describeWeatherCode, getSeasonsForTemperature, getWeatherEmoji } from "@/services/weather";
 import { router, useFocusEffect } from "expo-router";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   ActivityIndicator,
+  Image,
   Keyboard,
   Pressable,
+  ScrollView,
   StyleSheet,
   Text,
   TextInput,
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { getClothingItems } from "../../services/clothing";
+import { getClothingItems, getSuggestedItems } from "../../services/clothing";
 import { getOutfits } from "../../services/outfits";
 import { ClothingItem, Outfit } from "../../types/database";
 
@@ -28,6 +30,7 @@ export default function DashboardScreen() {
   const [loadingOutfit, setLoadingOutfit] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [allItems, setAllItems] = useState<ClothingItem[]>([]);
+  const [suggestedItems, setSuggestedItems] = useState<ClothingItem[]>([]);
 
   useFocusEffect(
     useCallback(() => {
@@ -45,6 +48,13 @@ export default function DashboardScreen() {
         .catch(() => {});
     }, []),
   );
+  useEffect(() => {
+    if (!weather) return;
+    const seasons = getSeasonsForTemperature(weather.temperature);
+    getSuggestedItems(seasons)
+      .then(setSuggestedItems)
+      .catch(() => {});
+  }, [weather]);
 
   const suggestions = searchQuery.trim()
     ? allItems.filter((item) =>
@@ -149,6 +159,39 @@ export default function DashboardScreen() {
           </Pressable>
         )}
       </ThemedView>
+      {suggestedItems.length > 0 && (
+        <ThemedView style={styles.section}>
+          <ThemedText style={styles.sectionTitle}>Predlog za danas</ThemedText>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+            {suggestedItems.map((item) => (
+              <Pressable
+                key={item.id}
+                style={styles.suggestedCard}
+                onPress={() => router.push(`/item-detail?id=${item.id}`)}
+              >
+                {item.image_url ? (
+                  <Image
+                    source={{ uri: item.image_url }}
+                    style={styles.suggestedImage}
+                  />
+                ) : (
+                  <View
+                    style={[
+                      styles.suggestedImage,
+                      styles.suggestedImagePlaceholder,
+                    ]}
+                  >
+                    <Text style={{ fontSize: 10 }}>Bez slike</Text>
+                  </View>
+                )}
+                <Text style={styles.suggestedName} numberOfLines={1}>
+                  {item.naziv}
+                </Text>
+              </Pressable>
+            ))}
+          </ScrollView>
+        </ThemedView>
+      )}
     </SafeAreaView>
   );
 }
@@ -229,4 +272,23 @@ const styles = StyleSheet.create({
   },
   emptyOutfitText: { color: "#666" },
   emptyOutfitLink: { color: "#3a2a25", fontWeight: "700", marginTop: 8 },
+  suggestedCard: {
+    width: 100,
+    marginRight: 10,
+    backgroundColor: "#f5f5f5",
+    borderRadius: 10,
+    padding: 6,
+  },
+  suggestedImage: {
+    width: "100%",
+    height: 90,
+    borderRadius: 8,
+    marginBottom: 4,
+  },
+  suggestedImagePlaceholder: {
+    backgroundColor: "#ddd",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  suggestedName: { fontSize: 11, color: "#333" },
 });

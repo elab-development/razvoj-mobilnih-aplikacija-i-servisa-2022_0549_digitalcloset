@@ -63,3 +63,13 @@ export function getWeatherEmoji(code: number): string {
   if ([95, 96, 99].includes(code)) return "⛈️";
   return "🌡️";
 }
+// Vraca listu sezona koje odgovaraju datoj temperaturi (mogu se preklapati)
+export function getSeasonsForTemperature(temp: number): string[] {
+  const seasons: string[] = [];
+
+  if (temp < 10) seasons.push("Zima");
+  if (temp >= 5 && temp < 20) seasons.push("Prolece/Jesen");
+  if (temp >= 18) seasons.push("Leto");
+
+  return seasons;
+}

@@ -4,31 +4,25 @@ import { router, useFocusEffect, useLocalSearchParams } from "expo-router";
 import { useCallback, useState } from "react";
 import {
   ActivityIndicator,
-  FlatList,
   Image,
   Pressable,
-  RefreshControl,
+  ScrollView,
   StyleSheet,
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { getClothingItems, toggleLiked } from "../../services/clothing";
+import {
+  getClothingItems,
+  groupByCategory,
+  toggleLiked,
+} from "../../services/clothing";
 import { ClothingItem } from "../../types/database";
 
 export default function WardrobeScreen() {
+  const { search } = useLocalSearchParams<{ search?: string }>();
   const [items, setItems] = useState<ClothingItem[]>([]);
   const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const { search } = useLocalSearchParams<{ search?: string }>();
-
-  const filteredItems = search
-    ? items.filter(
-        (item) =>
-          item.naziv.toLowerCase().includes(search.toLowerCase()) ||
-          item.kategorija.toLowerCase().includes(search.toLowerCase()),
-      )
-    : items;
 
   const loadItems = async () => {
     try {
@@ -39,7 +33,6 @@ export default function WardrobeScreen() {
       setError(err.message ?? "Greška pri učitavanju odeće");
     } finally {
       setLoading(false);
-      setRefreshing(false);
     }
   };
 
@@ -49,10 +42,6 @@ export default function WardrobeScreen() {
     }, []),
   );
 
-  const onRefresh = useCallback(() => {
-    setRefreshing(true);
-    loadItems();
-  }, []);
   const handleToggleLike = async (item: ClothingItem) => {
     try {
       const updated = await toggleLiked(item.id, item.omiljeno);
@@ -61,6 +50,17 @@ export default function WardrobeScreen() {
       console.log("Greška pri lajkovanju:", err.message);
     }
   };
+
+  const filteredItems = search
+    ? items.filter(
+        (item) =>
+          item.naziv.toLowerCase().includes(search.toLowerCase()) ||
+          item.kategorija.toLowerCase().includes(search.toLowerCase()),
+      )
+    : items;
+
+  const grouped = groupByCategory(filteredItems);
+  const categories = Object.keys(grouped);
 
   const renderContent = () => {
     if (loading) {
@@ -98,44 +98,49 @@ export default function WardrobeScreen() {
     }
 
     return (
-      <FlatList
-        data={filteredItems}
-        keyExtractor={(item) => item.id}
-        numColumns={2}
-        contentContainerStyle={styles.list}
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-        }
-        renderItem={({ item }) => (
-          <Pressable
-            style={styles.card}
-            onPress={() => router.push(`/item-detail?id=${item.id}`)}
-          >
-            <View style={styles.imageWrapper}>
-              {item.image_url ? (
-                <Image source={{ uri: item.image_url }} style={styles.image} />
-              ) : (
-                <View style={[styles.image, styles.imagePlaceholder]}>
-                  <ThemedText>Bez slike</ThemedText>
-                </View>
-              )}
-              <Pressable
-                style={styles.heartButton}
-                onPress={() => handleToggleLike(item)}
-                hitSlop={8}
-              >
-                <ThemedText style={styles.heartIcon}>
-                  {item.omiljeno ? "❤️" : "🤍"}
-                </ThemedText>
-              </Pressable>
-            </View>
-            <ThemedText style={styles.itemName}>{item.naziv}</ThemedText>
-            <ThemedText style={styles.itemCategory}>
-              {item.kategorija}
-            </ThemedText>
-          </Pressable>
-        )}
-      />
+      <ScrollView contentContainerStyle={styles.scrollContent}>
+        {categories.map((category) => (
+          <View key={category} style={styles.categorySection}>
+            <ThemedText style={styles.categoryTitle}>{category}</ThemedText>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+              {grouped[category].map((item) => (
+                <Pressable
+                  key={item.id}
+                  style={styles.card}
+                  onPress={() => router.push(`/item-detail?id=${item.id}`)}
+                >
+                  <View style={styles.imageWrapper}>
+                    {item.image_url ? (
+                      <Image
+                        source={{ uri: item.image_url }}
+                        style={styles.image}
+                      />
+                    ) : (
+                      <View style={[styles.image, styles.imagePlaceholder]}>
+                        <ThemedText style={{ fontSize: 10 }}>
+                          Bez slike
+                        </ThemedText>
+                      </View>
+                    )}
+                    <Pressable
+                      style={styles.heartButton}
+                      onPress={() => handleToggleLike(item)}
+                      hitSlop={8}
+                    >
+                      <ThemedText style={styles.heartIcon}>
+                        {item.omiljeno ? "❤️" : "🤍"}
+                      </ThemedText>
+                    </Pressable>
+                  </View>
+                  <ThemedText style={styles.itemName} numberOfLines={1}>
+                    {item.naziv}
+                  </ThemedText>
+                </Pressable>
+              ))}
+            </ScrollView>
+          </View>
+        ))}
+      </ScrollView>
     );
   };
 
@@ -162,28 +167,41 @@ const styles = StyleSheet.create({
   errorText: { color: "red", textAlign: "center" },
   emptyText: { fontSize: 16, fontWeight: "600" },
   emptySubtext: { marginTop: 4 },
-  list: { padding: 10 },
+  scrollContent: { paddingVertical: 12, paddingBottom: 100 },
+  categorySection: { marginBottom: 20 },
+  categoryTitle: {
+    fontSize: 17,
+    fontWeight: "700",
+    marginBottom: 10,
+    paddingHorizontal: 16,
+  },
   card: {
-    flex: 1,
-    margin: 6,
+    width: 110,
+    marginLeft: 12,
     backgroundColor: "#f5f5f5",
     borderRadius: 12,
     padding: 8,
-    maxWidth: "47%",
   },
-  image: {
-    width: "100%",
-    height: 140,
-    borderRadius: 8,
-    marginBottom: 6,
-  },
+  imageWrapper: { position: "relative" },
+  image: { width: "100%", height: 110, borderRadius: 8, marginBottom: 6 },
   imagePlaceholder: {
     backgroundColor: "#ddd",
     justifyContent: "center",
     alignItems: "center",
   },
-  itemName: { fontWeight: "600", color: "#222" },
-  itemCategory: { color: "#666", fontSize: 12 },
+  heartButton: {
+    position: "absolute",
+    top: 4,
+    right: 4,
+    backgroundColor: "rgba(0,0,0,0.35)",
+    borderRadius: 12,
+    width: 24,
+    height: 24,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  heartIcon: { fontSize: 12 },
+  itemName: { fontWeight: "600", color: "#222", fontSize: 12 },
   fab: {
     position: "absolute",
     right: 20,
@@ -200,23 +218,5 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     shadowOffset: { width: 0, height: 2 },
   },
-  fabText: {
-    color: "#fff",
-    fontSize: 28,
-    lineHeight: 30,
-    fontWeight: "600",
-  },
-  imageWrapper: { position: "relative" },
-  heartButton: {
-    position: "absolute",
-    top: 4,
-    right: 4,
-    backgroundColor: "rgba(0,0,0,0.35)",
-    borderRadius: 14,
-    width: 28,
-    height: 28,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  heartIcon: { fontSize: 14 },
+  fabText: { color: "#fff", fontSize: 28, lineHeight: 30, fontWeight: "600" },
 });

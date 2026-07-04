@@ -73,3 +73,19 @@ export async function deleteOutfit(id: string) {
   const { error } = await supabase.from("outfits").delete().eq("id", id);
   if (error) throw error;
 }
+// Ucitaj sve autfite SA slikama njihovih komada (za prikaz na Planer listi)
+export async function getOutfitsWithItems() {
+  const outfits = await getOutfits();
+
+  const outfitsWithImages = await Promise.all(
+    outfits.map(async (outfit) => {
+      const items = await getOutfitItems(outfit.id);
+      const itemImages = items
+        .map((item) => item.image_url)
+        .filter(Boolean) as string[];
+      return { ...outfit, itemImages };
+    }),
+  );
+
+  return outfitsWithImages;
+}

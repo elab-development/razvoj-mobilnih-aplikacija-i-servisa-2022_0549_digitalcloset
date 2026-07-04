@@ -3,18 +3,18 @@ import { ThemedView } from "@/components/themed-view";
 import { router, useFocusEffect, useLocalSearchParams } from "expo-router";
 import { useCallback, useState } from "react";
 import {
-    ActivityIndicator,
-    Alert,
-    FlatList,
-    Image,
-    Pressable,
-    StyleSheet,
+  ActivityIndicator,
+  Alert,
+  FlatList,
+  Image,
+  Pressable,
+  StyleSheet,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import {
-    deleteOutfit,
-    getOutfitById,
-    getOutfitItems,
+  deleteOutfit,
+  getOutfitById,
+  getOutfitItems,
 } from "../services/outfits";
 import { ClothingItem, Outfit } from "../types/database";
 
@@ -121,7 +121,7 @@ export default function OutfitDetailScreen() {
         <FlatList
           data={items}
           keyExtractor={(item) => item.id}
-          numColumns={3}
+          numColumns={2}
           contentContainerStyle={styles.grid}
           renderItem={({ item }) => (
             <ThemedView style={styles.itemCard}>
@@ -172,13 +172,13 @@ const styles = StyleSheet.create({
   grid: { padding: 16 },
   itemCard: {
     flex: 1,
-    margin: 4,
-    padding: 6,
-    borderRadius: 10,
+    margin: 6,
+    padding: 8,
+    borderRadius: 12,
     backgroundColor: "#f5f5f5",
-    maxWidth: "31%",
+    maxWidth: "47%",
   },
-  itemImage: { width: "100%", height: 80, borderRadius: 6, marginBottom: 4 },
+  itemImage: { width: "100%", height: 160, borderRadius: 10, marginBottom: 6 },
   itemImagePlaceholder: {
     backgroundColor: "#ddd",
     justifyContent: "center",
