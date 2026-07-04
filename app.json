@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "digitalni-orman",
+    "name": "StyleMe",
     "slug": "digitalni-orman",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -9,9 +9,16 @@
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.digitalcloset.digitalniorman",
+      "infoPlist": {
+        "NSCameraUsageDescription": "Aplikacija koristi kameru da bi mogla da fotografiše tvoje odevne predmete.",
+        "NSPhotoLibraryUsageDescription": "Aplikacija pristupa galeriji da bi mogla da izabereš sliku odevnog predmeta.",
+        "NSLocationWhenInUseUsageDescription": "Aplikacija koristi tvoju lokaciju da bi prikazala trenutnu vremensku prognozu i predložila odgovarajuću odeću."
+      }
     },
     "android": {
+      "package": "com.digitalcloset.digitalniorman",
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
@@ -19,7 +26,14 @@
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
       "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "permissions": [
+        "CAMERA",
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION",
+        "RECEIVE_BOOT_COMPLETED",
+        "SCHEDULE_EXACT_ALARM"
+      ]
     },
     "web": {
       "output": "static",
@@ -31,15 +45,35 @@
         "expo-splash-screen",
         {
           "image": "./assets/images/splash-icon.png",
-          "imageWidth": 200,
+          "imageWidth": 250,
           "resizeMode": "contain",
-          "backgroundColor": "#ffffff",
+          "backgroundColor": "#ffd6e0",
           "dark": {
-            "backgroundColor": "#000000"
+            "backgroundColor": "#ffd6e0"
           }
         }
       ],
-      "@react-native-community/datetimepicker"
+      "@react-native-community/datetimepicker",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Aplikacija pristupa galeriji da bi mogla da izabereš sliku odevnog predmeta.",
+          "cameraPermission": "Aplikacija koristi kameru da bi mogla da fotografiše tvoje odevne predmete."
+        }
+      ],
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "Aplikacija koristi tvoju lokaciju da bi prikazala trenutnu vremensku prognozu."
+        }
+      ],
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/images/icon.png",
+          "color": "#3a2a25"
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true,
