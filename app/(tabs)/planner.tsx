@@ -52,7 +52,7 @@ export default function PlannerScreen() {
     if (loading) {
       return (
         <ThemedView style={styles.centered}>
-          <ActivityIndicator size="large" />
+          <ActivityIndicator size="large" color="#3a2a25" />
           <ThemedText style={styles.loadingText}>
             Učitavanje autfita...
           </ThemedText>
@@ -86,6 +86,7 @@ export default function PlannerScreen() {
         data={outfits}
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.list}
+        showsVerticalScrollIndicator={false}
         renderItem={({ item }) => (
           <Pressable
             style={styles.card}
@@ -97,7 +98,9 @@ export default function PlannerScreen() {
               ))}
               {item.itemImages.length === 0 && (
                 <View style={[styles.itemThumb, styles.itemThumbPlaceholder]}>
-                  <ThemedText style={{ fontSize: 10 }}>Bez slika</ThemedText>
+                  <ThemedText style={{ fontSize: 10, color: "#3a2a25" }}>
+                    Bez slika
+                  </ThemedText>
                 </View>
               )}
             </View>
@@ -135,27 +138,60 @@ export default function PlannerScreen() {
 }
 
 const styles = StyleSheet.create({
-  screen: { flex: 1 },
-  header: { paddingHorizontal: 20, paddingTop: 10, paddingBottom: 4 },
-  headerTitle: { fontSize: 22, fontWeight: "700" },
+  screen: {
+    flex: 1,
+    backgroundColor: "#FFDBDB",
+  },
+  header: {
+    paddingHorizontal: 20,
+    paddingTop: 15,
+    paddingBottom: 8,
+    backgroundColor: "transparent",
+  },
+  headerTitle: {
+    fontSize: 24,
+    fontWeight: "700",
+    color: "#3a2a25",
+  },
   centered: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
     padding: 20,
+    backgroundColor: "transparent",
   },
-  loadingText: { marginTop: 10 },
-  errorText: { color: "red", textAlign: "center" },
-  emptyText: { fontSize: 16, fontWeight: "600" },
-  emptySubtext: { marginTop: 4 },
-  list: { padding: 16 },
+  loadingText: {
+    marginTop: 10,
+    color: "#644A07",
+  },
+  errorText: {
+    color: "#c0392b",
+    textAlign: "center",
+  },
+  emptyText: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#3a2a25",
+  },
+  emptySubtext: {
+    marginTop: 4,
+    color: "#644A07",
+  },
+  list: {
+    padding: 16,
+  },
   card: {
     backgroundColor: "#fff",
     borderRadius: 16,
     padding: 14,
     marginBottom: 14,
     borderWidth: 1,
-    borderColor: "#eee",
+    borderColor: "#FFC6C6",
+    shadowColor: "#3a2a25",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 2,
   },
   imagesGrid: {
     flexDirection: "row",
@@ -168,12 +204,21 @@ const styles = StyleSheet.create({
     borderRadius: 10,
   },
   itemThumbPlaceholder: {
-    backgroundColor: "#eee",
+    backgroundColor: "#FFC6C6",
     justifyContent: "center",
     alignItems: "center",
   },
-  cardDate: { fontWeight: "700", fontSize: 13, color: "#3a2a25" },
-  cardTitle: { fontWeight: "600", color: "#222", fontSize: 14, marginTop: 2 },
+  cardDate: {
+    fontWeight: "700",
+    fontSize: 13,
+    color: "#644A07",
+  },
+  cardTitle: {
+    fontWeight: "600",
+    color: "#3a2a25",
+    fontSize: 15,
+    marginTop: 2,
+  },
   fab: {
     position: "absolute",
     right: 20,
@@ -185,10 +230,15 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     elevation: 4,
-    shadowColor: "#000",
+    shadowColor: "#3a2a25",
     shadowOpacity: 0.2,
     shadowRadius: 4,
     shadowOffset: { width: 0, height: 2 },
   },
-  fabText: { color: "#fff", fontSize: 28, lineHeight: 30, fontWeight: "600" },
+  fabText: {
+    color: "#FFDBDB",
+    fontSize: 28,
+    lineHeight: 30,
+    fontWeight: "600",
+  },
 });

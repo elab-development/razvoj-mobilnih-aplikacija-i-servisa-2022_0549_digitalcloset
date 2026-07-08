@@ -10,8 +10,9 @@ import {
   ScrollView,
   StyleSheet,
   TextInput,
-  View
+  View,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import {
   addClothingItem,
   getClothingItemById,
@@ -40,7 +41,6 @@ export default function AddItemScreen() {
   const [saving, setSaving] = useState(false);
   const [loadingItem, setLoadingItem] = useState(isEditMode);
 
-  // Ako smo u edit rezimu, ucitaj postojece podatke predmeta
   useEffect(() => {
     if (!id) return;
     getClothingItemById(id)
@@ -149,7 +149,7 @@ export default function AddItemScreen() {
   if (loadingItem) {
     return (
       <View style={styles.centered}>
-        <ActivityIndicator size="large" />
+        <ActivityIndicator size="large" color="#3a2a25" />
       </View>
     );
   }
@@ -157,129 +157,209 @@ export default function AddItemScreen() {
   const displayImage = imageUri ?? existingImageUrl;
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      <ThemedText style={styles.title}>
-        {isEditMode ? "Izmeni predmet" : "New piece"}
-      </ThemedText>
-
-      <Pressable style={styles.photoButton} onPress={pickImage}>
-        {displayImage ? (
-          <Image source={{ uri: displayImage }} style={styles.preview} />
-        ) : (
-          <ThemedText style={styles.photoButtonText}>Add photo</ThemedText>
-        )}
-      </Pressable>
-
-      <ThemedText style={styles.label}>Item name</ThemedText>
-      <TextInput
-        style={styles.input}
-        placeholder="Item name"
-        placeholderTextColor="#888"
-        value={naziv}
-        onChangeText={setNaziv}
-      />
-
-      <ThemedText style={styles.label}>Category</ThemedText>
-      <View style={styles.chipRow}>
-        {KATEGORIJE.map((kat) => (
-          <Pressable
-            key={kat}
-            style={[styles.chip, kategorija === kat && styles.chipActive]}
-            onPress={() => setKategorija(kat)}
-          >
-            <ThemedText
-              style={
-                kategorija === kat ? styles.chipTextActive : styles.chipText
-              }
-            >
-              {kat}
-            </ThemedText>
-          </Pressable>
-        ))}
-      </View>
-
-      <ThemedText style={styles.label}>Sezona (opciono)</ThemedText>
-      <View style={styles.chipRow}>
-        {SEZONE.map((s) => (
-          <Pressable
-            key={s.value}
-            style={[styles.chip, sezona === s.value && styles.chipActive]}
-            onPress={() => setSezona(sezona === s.value ? "" : s.value)}
-          >
-            <ThemedText
-              style={
-                sezona === s.value ? styles.chipTextActive : styles.chipText
-              }
-            >
-              {s.label}
-            </ThemedText>
-          </Pressable>
-        ))}
-      </View>
-
-      <Pressable
-        style={styles.saveButton}
-        onPress={handleSave}
-        disabled={saving}
+    <SafeAreaView style={styles.screen} edges={["top", "left", "right"]}>
+      <ScrollView
+        contentContainerStyle={styles.container}
+        showsVerticalScrollIndicator={false}
       >
-        {saving ? (
-          <ActivityIndicator color="#fff" />
-        ) : (
-          <ThemedText style={styles.saveButtonText}>
-            {isEditMode ? "Sačuvaj izmene" : "Save item"}
-          </ThemedText>
-        )}
-      </Pressable>
-    </ScrollView>
+        <Pressable onPress={() => router.back()} style={styles.backButton}>
+          <ThemedText style={styles.backButtonText}>{"‹ Nazad"}</ThemedText>
+        </Pressable>
+
+        <ThemedText style={styles.title}>
+          {isEditMode ? "Izmeni predmet" : "Novi komad"}
+        </ThemedText>
+
+        <Pressable style={styles.photoButton} onPress={pickImage}>
+          {displayImage ? (
+            <Image source={{ uri: displayImage }} style={styles.preview} />
+          ) : (
+            <ThemedText style={styles.photoButtonText}>
+              Dodaj fotografiju
+            </ThemedText>
+          )}
+        </Pressable>
+
+        <ThemedText style={styles.label}>Naziv komada</ThemedText>
+        <TextInput
+          style={styles.input}
+          placeholder="Unesi naziv..."
+          placeholderTextColor="#644A0766"
+          value={naziv}
+          onChangeText={setNaziv}
+        />
+
+        <ThemedText style={styles.label}>Kategorija</ThemedText>
+        <View style={styles.chipRow}>
+          {KATEGORIJE.map((kat) => (
+            <Pressable
+              key={kat}
+              style={[styles.chip, kategorija === kat && styles.chipActive]}
+              onPress={() => setKategorija(kat)}
+            >
+              <ThemedText
+                style={
+                  kategorija === kat ? styles.chipTextActive : styles.chipText
+                }
+              >
+                {kat}
+              </ThemedText>
+            </Pressable>
+          ))}
+        </View>
+
+        <ThemedText style={styles.label}>Sezona (opciono)</ThemedText>
+        <View style={styles.chipRow}>
+          {SEZONE.map((s) => (
+            <Pressable
+              key={s.value}
+              style={[styles.chip, sezona === s.value && styles.chipActive]}
+              onPress={() => setSezona(sezona === s.value ? "" : s.value)}
+            >
+              <ThemedText
+                style={
+                  sezona === s.value ? styles.chipTextActive : styles.chipText
+                }
+              >
+                {s.label}
+              </ThemedText>
+            </Pressable>
+          ))}
+        </View>
+
+        <Pressable
+          style={styles.saveButton}
+          onPress={handleSave}
+          disabled={saving}
+        >
+          {saving ? (
+            <ActivityIndicator color="#FFDBDB" />
+          ) : (
+            <ThemedText style={styles.saveButtonText}>
+              {isEditMode ? "Sačuvaj izmene" : "Sačuvaj komad"}
+            </ThemedText>
+          )}
+        </Pressable>
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  centered: { flex: 1, justifyContent: "center", alignItems: "center" },
-  container: { padding: 20, paddingBottom: 40 },
+  screen: {
+    flex: 1,
+    backgroundColor: "#FFDBDB",
+  },
+  centered: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#FFDBDB",
+  },
+  container: {
+    padding: 20,
+    paddingBottom: 40,
+  },
+  backButton: {
+    marginBottom: 12,
+    alignSelf: "flex-start",
+  },
+  backButtonText: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#3a2a25",
+  },
   title: {
-    fontSize: 22,
+    fontSize: 24,
     fontWeight: "700",
     textAlign: "center",
-    marginBottom: 20,
+    marginBottom: 24,
+    color: "#3a2a25",
   },
   photoButton: {
-    height: 160,
-    borderRadius: 12,
-    backgroundColor: "#eee",
+    height: 180,
+    borderRadius: 16,
+    backgroundColor: "#fff",
     justifyContent: "center",
     alignItems: "center",
     marginBottom: 20,
     overflow: "hidden",
+    borderWidth: 1,
+    borderColor: "#FFC6C6",
+    shadowColor: "#3a2a25",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 2,
   },
-  photoButtonText: { color: "#555", fontWeight: "600" },
-  preview: { width: "100%", height: "100%" },
-  label: { fontWeight: "600", marginBottom: 6, marginTop: 10 },
+  photoButtonText: {
+    color: "#644A07",
+    fontWeight: "600",
+    fontSize: 15,
+  },
+  preview: {
+    width: "100%",
+    height: "100%",
+  },
+  label: {
+    fontWeight: "700",
+    marginBottom: 8,
+    marginTop: 16,
+    color: "#3a2a25",
+    fontSize: 15,
+  },
   input: {
     borderWidth: 1,
-    borderColor: "#ddd",
-    borderRadius: 8,
-    padding: 10,
+    borderColor: "#FFC6C6",
+    borderRadius: 12,
+    padding: 12,
     marginBottom: 4,
     backgroundColor: "#fff",
-    color: "#000",
+    color: "#3a2a25",
+    fontSize: 15,
   },
-  chipRow: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
+  chipRow: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 8,
+    marginTop: 4,
+  },
   chip: {
     paddingVertical: 8,
-    paddingHorizontal: 14,
+    paddingHorizontal: 16,
     borderRadius: 20,
-    backgroundColor: "#eee",
+    backgroundColor: "#fff",
+    borderWidth: 1,
+    borderColor: "#FFC6C6",
   },
-  chipActive: { backgroundColor: "#3a2a25" },
-  chipText: { color: "#333" },
-  chipTextActive: { color: "#fff", fontWeight: "600" },
-  saveButton: {
-    marginTop: 24,
+  chipActive: {
     backgroundColor: "#3a2a25",
-    borderRadius: 10,
+    borderColor: "#3a2a25",
+  },
+  chipText: {
+    color: "#644A07",
+    fontSize: 14,
+  },
+  chipTextActive: {
+    color: "#FFDBDB",
+    fontWeight: "700",
+    fontSize: 14,
+  },
+  saveButton: {
+    marginTop: 32,
+    backgroundColor: "#3a2a25",
+    borderRadius: 14,
     paddingVertical: 14,
     alignItems: "center",
+    elevation: 3,
+    shadowColor: "#3a2a25",
+    shadowOpacity: 0.15,
+    shadowRadius: 4,
+    shadowOffset: { width: 0, height: 2 },
   },
-  saveButtonText: { color: "#fff", fontWeight: "700" },
+  saveButtonText: {
+    color: "#FFDBDB",
+    fontWeight: "700",
+    fontSize: 16,
+  },
 });

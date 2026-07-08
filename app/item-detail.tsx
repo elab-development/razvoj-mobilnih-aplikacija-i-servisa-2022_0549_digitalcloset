@@ -1,5 +1,3 @@
-import { ThemedText } from "@/components/themed-text";
-import { ThemedView } from "@/components/themed-view";
 import { router, useFocusEffect, useLocalSearchParams } from "expo-router";
 import { useCallback, useState } from "react";
 import {
@@ -8,6 +6,8 @@ import {
   Image,
   Pressable,
   StyleSheet,
+  Text,
+  View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import {
@@ -27,12 +27,14 @@ export default function ItemDetailScreen() {
     useCallback(() => {
       if (!id) return;
       setLoading(true);
+      setError(null);
       getClothingItemById(id)
         .then(setItem)
         .catch((err) => setError(err.message ?? "Greška pri učitavanju"))
         .finally(() => setLoading(false));
     }, [id]),
   );
+
   const handleDelete = () => {
     if (!item) return;
 
@@ -56,6 +58,7 @@ export default function ItemDetailScreen() {
       ],
     );
   };
+
   const handleToggleLike = async () => {
     if (!item) return;
     try {
@@ -68,125 +71,210 @@ export default function ItemDetailScreen() {
 
   if (loading) {
     return (
-      <ThemedView style={styles.centered}>
-        <ActivityIndicator size="large" />
-      </ThemedView>
+      <View style={styles.centered}>
+        <ActivityIndicator size="large" color="#3a2a25" />
+      </View>
     );
   }
 
   if (error || !item) {
     return (
-      <ThemedView style={styles.centered}>
-        <ThemedText style={styles.errorText}>
+      <View style={styles.centered}>
+        <Text style={styles.errorText}>
           {error ?? "Predmet nije pronađen."}
-        </ThemedText>
-      </ThemedView>
+        </Text>
+      </View>
     );
   }
 
   return (
     <SafeAreaView style={styles.screen} edges={["top"]}>
-      <Pressable onPress={() => router.back()} style={styles.backButton}>
-        <ThemedText style={styles.backButtonText}>{"< Nazad"}</ThemedText>
-      </Pressable>
-      <Pressable style={styles.likeButton} onPress={handleToggleLike}>
-        <ThemedText style={styles.likeIcon}>
-          {item.omiljeno ? "❤️" : "🤍"}
-        </ThemedText>
-      </Pressable>
+      <View style={styles.header}>
+        <Pressable onPress={() => router.back()} style={styles.backButton}>
+          <Text style={styles.backButtonText}>{"‹ Nazad"}</Text>
+        </Pressable>
+        <Pressable style={styles.likeButton} onPress={handleToggleLike}>
+          <Text style={styles.likeIcon}>{item.omiljeno ? "❤️" : "🤍"}</Text>
+        </Pressable>
+      </View>
 
-      {item.image_url ? (
-        <Image source={{ uri: item.image_url }} style={styles.image} />
-      ) : (
-        <ThemedView style={[styles.image, styles.imagePlaceholder]}>
-          <ThemedText>Bez slike</ThemedText>
-        </ThemedView>
-      )}
+      <View style={styles.imageContainer}>
+        {item.image_url ? (
+          <Image
+            source={{ uri: item.image_url }}
+            style={styles.image}
+            resizeMode="contain"
+          />
+        ) : (
+          <View style={styles.imagePlaceholder}>
+            <Text style={styles.placeholderText}>Bez slike</Text>
+          </View>
+        )}
+      </View>
 
-      <ThemedView style={styles.details}>
-        <ThemedText style={styles.title}>{item.naziv}</ThemedText>
+      <View style={styles.detailsContainer}>
+        <Text style={styles.title}>{item.naziv}</Text>
 
-        <ThemedView style={styles.row}>
-          <ThemedText style={styles.label}>Kategorija:</ThemedText>
-          <ThemedText>{item.kategorija}</ThemedText>
-        </ThemedView>
+        <View style={styles.row}>
+          <Text style={styles.label}>Kategorija:</Text>
+          <Text style={styles.valueText}>{item.kategorija}</Text>
+        </View>
 
         {item.sezona && (
-          <ThemedView style={styles.row}>
-            <ThemedText style={styles.label}>Sezona:</ThemedText>
-            <ThemedText>{item.sezona}</ThemedText>
-          </ThemedView>
+          <View style={styles.row}>
+            <Text style={styles.label}>Sezona:</Text>
+            <Text style={styles.valueText}>{item.sezona}</Text>
+          </View>
         )}
 
         {item.boja && (
-          <ThemedView style={styles.row}>
-            <ThemedText style={styles.label}>Boja:</ThemedText>
-            <ThemedText>{item.boja}</ThemedText>
-          </ThemedView>
+          <View style={styles.row}>
+            <Text style={styles.label}>Boja:</Text>
+            <Text style={styles.valueText}>{item.boja}</Text>
+          </View>
         )}
 
-        <ThemedView style={styles.row}>
-          <ThemedText style={styles.label}>Broj nošenja:</ThemedText>
-          <ThemedText>{item.broj_nosenja ?? 0}</ThemedText>
-        </ThemedView>
-      </ThemedView>
+        <View style={styles.row}>
+          <Text style={styles.label}>Broj nošenja:</Text>
+          <Text style={styles.valueText}>{item.broj_nosenja ?? 0}</Text>
+        </View>
+      </View>
+
       <Pressable
         style={styles.editButton}
         onPress={() => router.push(`/add-item?id=${item.id}`)}
       >
-        <ThemedText style={styles.editButtonText}>Izmeni predmet</ThemedText>
+        <Text style={styles.editButtonText}>Izmeni predmet</Text>
       </Pressable>
+
       <Pressable style={styles.deleteButton} onPress={handleDelete}>
-        <ThemedText style={styles.deleteButtonText}>Obriši predmet</ThemedText>
+        <Text style={styles.deleteButtonText}>Obriši predmet</Text>
       </Pressable>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  screen: { flex: 1 },
-  centered: { flex: 1, justifyContent: "center", alignItems: "center" },
-  errorText: { color: "red" },
-  backButton: { padding: 16 },
-  backButtonText: { fontSize: 16, fontWeight: "600" },
-  image: { width: "100%", height: 320 },
-  imagePlaceholder: { justifyContent: "center", alignItems: "center" },
-  details: { padding: 20 },
-  title: { fontSize: 22, fontWeight: "700", marginBottom: 16 },
-  row: { flexDirection: "row", marginBottom: 10, gap: 6 },
-  label: { fontWeight: "600" },
-  deleteButton: {
-    marginHorizontal: 20,
-    marginTop: 10,
-    backgroundColor: "#c0392b",
-    borderRadius: 10,
-    paddingVertical: 14,
+  screen: {
+    flex: 1,
+    backgroundColor: "#FFDBDB",
+  },
+  centered: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#FFDBDB",
+  },
+  errorText: {
+    color: "#8b251e",
+    fontSize: 16,
+    fontWeight: "600",
+  },
+  header: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+  },
+  backButton: {
+    padding: 12,
+  },
+  backButtonText: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#3a2a25",
+  },
+  likeButton: {
+    padding: 12,
+  },
+  likeIcon: {
+    fontSize: 24,
+  },
+  imageContainer: {
+    width: "100%",
+    height: 300,
+    backgroundColor: "#fff",
+    justifyContent: "center",
     alignItems: "center",
   },
-  deleteButtonText: {
-    color: "#fff",
+  image: {
+    width: "100%",
+    height: "100%",
+  },
+  imagePlaceholder: {
+    flex: 1,
+    width: "100%",
+    backgroundColor: "#FFC6C6",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  placeholderText: {
+    color: "#3a2a25",
+    fontSize: 16,
+    fontWeight: "600",
+  },
+  detailsContainer: {
+    padding: 20,
+    marginHorizontal: 16,
+    marginTop: 20,
+    marginBottom: 10,
+    backgroundColor: "#fff",
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: "#FFC6C6",
+    shadowColor: "#3a2a25",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  title: {
+    fontSize: 22,
     fontWeight: "700",
+    marginBottom: 16,
+    color: "#3a2a25",
+  },
+  row: {
+    flexDirection: "row",
+    marginBottom: 12,
+    gap: 8,
+    alignItems: "center",
+  },
+  label: {
+    fontWeight: "700",
+    color: "#3a2a25",
+    fontSize: 15,
+  },
+  valueText: {
+    color: "#644A07",
+    fontSize: 15,
+    fontWeight: "600",
   },
   editButton: {
-    marginHorizontal: 20,
-    marginTop: 10,
+    marginHorizontal: 16,
+    marginTop: 12,
     backgroundColor: "#3a2a25",
-    borderRadius: 10,
+    borderRadius: 14,
     paddingVertical: 14,
     alignItems: "center",
   },
   editButtonText: {
-    color: "#fff",
+    color: "#FFDBDB",
     fontWeight: "700",
+    fontSize: 16,
   },
-  likeButton: {
-    position: "absolute",
-    top: 16,
-    right: 16,
-    zIndex: 10,
-    backgroundColor: "rgba(0,0,0,0.3)",
-    borderRadius: 20,
-    padding: 8,
+  deleteButton: {
+    marginHorizontal: 16,
+    marginTop: 12,
+    backgroundColor: "#8b251e",
+    borderRadius: 14,
+    paddingVertical: 14,
+    alignItems: "center",
   },
-  likeIcon: { fontSize: 22 },
+  deleteButtonText: {
+    color: "#FFDBDB",
+    fontWeight: "700",
+    fontSize: 16,
+  },
 });

@@ -66,7 +66,7 @@ export default function WardrobeScreen() {
     if (loading) {
       return (
         <ThemedView style={styles.centered}>
-          <ActivityIndicator size="large" />
+          <ActivityIndicator size="large" color="#3a2a25" />
           <ThemedText style={styles.loadingText}>
             Učitavanje ormana...
           </ThemedText>
@@ -98,11 +98,18 @@ export default function WardrobeScreen() {
     }
 
     return (
-      <ScrollView contentContainerStyle={styles.scrollContent}>
+      <ScrollView
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
         {categories.map((category) => (
           <View key={category} style={styles.categorySection}>
             <ThemedText style={styles.categoryTitle}>{category}</ThemedText>
-            <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={{ paddingRight: 16 }}
+            >
               {grouped[category].map((item) => (
                 <Pressable
                   key={item.id}
@@ -117,7 +124,7 @@ export default function WardrobeScreen() {
                       />
                     ) : (
                       <View style={[styles.image, styles.imagePlaceholder]}>
-                        <ThemedText style={{ fontSize: 10 }}>
+                        <ThemedText style={{ fontSize: 10, color: "#3a2a25" }}>
                           Bez slike
                         </ThemedText>
                       </View>
@@ -156,44 +163,79 @@ export default function WardrobeScreen() {
 }
 
 const styles = StyleSheet.create({
-  screen: { flex: 1 },
+  screen: {
+    flex: 1,
+    backgroundColor: "#FFDBDB",
+  },
   centered: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
     padding: 20,
+    backgroundColor: "transparent",
   },
-  loadingText: { marginTop: 10 },
-  errorText: { color: "red", textAlign: "center" },
-  emptyText: { fontSize: 16, fontWeight: "600" },
-  emptySubtext: { marginTop: 4 },
-  scrollContent: { paddingVertical: 12, paddingBottom: 100 },
-  categorySection: { marginBottom: 20 },
+  loadingText: {
+    marginTop: 10,
+    color: "#644A07",
+  },
+  errorText: {
+    color: "#c0392b",
+    textAlign: "center",
+  },
+  emptyText: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#3a2a25",
+  },
+  emptySubtext: {
+    marginTop: 4,
+    color: "#644A07",
+  },
+  scrollContent: {
+    paddingVertical: 16,
+    paddingBottom: 100,
+  },
+  categorySection: {
+    marginBottom: 24,
+  },
   categoryTitle: {
-    fontSize: 17,
+    fontSize: 18,
     fontWeight: "700",
-    marginBottom: 10,
+    marginBottom: 12,
     paddingHorizontal: 16,
+    color: "#3a2a25",
   },
   card: {
-    width: 110,
-    marginLeft: 12,
-    backgroundColor: "#f5f5f5",
-    borderRadius: 12,
+    width: 116,
+    marginLeft: 16,
+    backgroundColor: "#fff",
+    borderRadius: 14,
     padding: 8,
+    borderWidth: 1,
+    borderColor: "#FFC6C6",
+    shadowColor: "#3a2a25",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 2,
   },
   imageWrapper: { position: "relative" },
-  image: { width: "100%", height: 110, borderRadius: 8, marginBottom: 6 },
+  image: {
+    width: "100%",
+    height: 110,
+    borderRadius: 10,
+    marginBottom: 6,
+  },
   imagePlaceholder: {
-    backgroundColor: "#ddd",
+    backgroundColor: "#FFC6C6",
     justifyContent: "center",
     alignItems: "center",
   },
   heartButton: {
     position: "absolute",
-    top: 4,
-    right: 4,
-    backgroundColor: "rgba(0,0,0,0.35)",
+    top: 6,
+    right: 6,
+    backgroundColor: "#3a2a25cc",
     borderRadius: 12,
     width: 24,
     height: 24,
@@ -201,7 +243,12 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   heartIcon: { fontSize: 12 },
-  itemName: { fontWeight: "600", color: "#222", fontSize: 12 },
+  itemName: {
+    fontWeight: "600",
+    color: "#3a2a25",
+    fontSize: 13,
+    paddingHorizontal: 2,
+  },
   fab: {
     position: "absolute",
     right: 20,
@@ -213,10 +260,15 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     elevation: 4,
-    shadowColor: "#000",
+    shadowColor: "#3a2a25",
     shadowOpacity: 0.2,
     shadowRadius: 4,
     shadowOffset: { width: 0, height: 2 },
   },
-  fabText: { color: "#fff", fontSize: 28, lineHeight: 30, fontWeight: "600" },
+  fabText: {
+    color: "#FFDBDB",
+    fontSize: 28,
+    lineHeight: 30,
+    fontWeight: "600",
+  },
 });

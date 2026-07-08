@@ -5,7 +5,7 @@ import {
 } from "@react-navigation/native";
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
-import { StyleSheet, Text, View } from "react-native";
+import { Image, StyleSheet, Text, View } from "react-native";
 import "react-native-reanimated";
 
 import {
@@ -35,7 +35,11 @@ function RootLayoutNav() {
   if (authLoading || hasSeenOnboarding === null) {
     return (
       <View style={styles.splash}>
-        <Text style={styles.splashEmoji}>👗</Text>
+        <Image
+          source={require("../assets/images/splash-icon.png")}
+          style={styles.logo}
+          resizeMode="contain"
+        />
         <Text style={styles.splashTitle}>Digitalni Orman</Text>
       </View>
     );
@@ -54,6 +58,11 @@ function RootLayoutNav() {
             name="modal"
             options={{ presentation: "modal", title: "Modal" }}
           />
+          <Stack.Screen name="add-item" options={{ headerShown: false }} />
+          <Stack.Screen name="create-outfit" options={{ headerShown: false }} />
+          <Stack.Screen name="item-detail" options={{ headerShown: false }} />
+          <Stack.Screen name="outfit-detail" options={{ headerShown: false }} />
+          <Stack.Screen name="liked-items" options={{ headerShown: false }} />
         </Stack.Protected>
 
         <Stack.Protected guard={hasSeenOnboarding && !isLoggedIn}>
@@ -70,8 +79,16 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#3a2a25",
+    backgroundColor: "#FFDBDB",
   },
-  splashEmoji: { fontSize: 64, marginBottom: 12 },
-  splashTitle: { fontSize: 22, fontWeight: "700", color: "#fff" },
+  logo: {
+    width: 250,
+    height: 250,
+    marginBottom: 16,
+  },
+  splashTitle: {
+    fontSize: 24,
+    fontWeight: "700",
+    color: "#3a2a25",
+  },
 });

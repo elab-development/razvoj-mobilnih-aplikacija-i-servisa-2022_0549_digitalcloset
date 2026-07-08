@@ -187,17 +187,30 @@ export default function ProfileScreen() {
         <ThemedText style={styles.logoutButtonText}>Odjavi se</ThemedText>
       </Pressable>
 
-      <Pressable onPress={() => AsyncStorage.removeItem("hasSeenOnboarding")}>
-        <ThemedText>[DEV] Resetuj onboarding</ThemedText>
+      <Pressable
+        style={styles.secretReset}
+        onPress={() => AsyncStorage.removeItem("hasSeenOnboarding")}
+      >
+        <ThemedText style={{ color: "#3a2a25" }}>
+          [DEV] Resetuj onboarding
+        </ThemedText>
       </Pressable>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  screen: { flex: 1 },
+  screen: {
+    flex: 1,
+    backgroundColor: "#FFDBDB",
+  },
   centered: { flex: 1, justifyContent: "center", alignItems: "center" },
-  header: { alignItems: "center", paddingTop: 20, paddingHorizontal: 20 },
+  header: {
+    alignItems: "center",
+    paddingTop: 24,
+    paddingHorizontal: 20,
+    backgroundColor: "transparent",
+  },
   avatar: {
     width: 80,
     height: 80,
@@ -207,21 +220,32 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginBottom: 12,
   },
-  avatarText: { color: "#fff", fontSize: 32, fontWeight: "700" },
-  name: { fontSize: 22, fontWeight: "700" },
-  email: { fontSize: 13, color: "#888", marginTop: 2 },
-  location: { fontSize: 14, marginTop: 6 },
-  editLink: { marginTop: 10 },
-  editLinkText: { color: "#3a2a25", fontWeight: "600" },
+  avatarText: {
+    color: "#fff",
+    fontSize: 32,
+    fontWeight: "700",
+    textAlign: "center",
+    alignSelf: "center",
+    lineHeight: 40,
+  },
+  name: { fontSize: 22, fontWeight: "700", color: "#3a2a25" },
+  email: { fontSize: 13, color: "#644A07", marginTop: 2 },
+  location: { fontSize: 14, marginTop: 6, color: "#3a2a25" },
+  editLink: { marginTop: 10, paddingVertical: 4 },
+  editLinkText: {
+    color: "#3a2a25",
+    fontWeight: "700",
+    textDecorationLine: "underline",
+  }, // Sada je vidljivo i podvučeno
   editInput: {
     width: "100%",
     borderWidth: 1,
-    borderColor: "#ddd",
+    borderColor: "#FFC6C6",
     borderRadius: 8,
     padding: 10,
     marginTop: 8,
     backgroundColor: "#fff",
-    color: "#000",
+    color: "#3a2a25",
   },
   saveButton: {
     marginTop: 12,
@@ -236,34 +260,59 @@ const styles = StyleSheet.create({
     marginHorizontal: 20,
     marginTop: 24,
     gap: 12,
+    backgroundColor: "transparent",
   },
   statCard: {
     flex: 1,
-    backgroundColor: "#f5f5f5",
+    backgroundColor: "#fff",
     borderRadius: 12,
-    padding: 16,
+    paddingVertical: 16,
+    paddingHorizontal: 8,
     alignItems: "center",
+    justifyContent: "center",
+    shadowColor: "#3a2a25",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 2,
   },
-  statNumber: { fontSize: 24, fontWeight: "700", color: "#3a2a25" },
-  statLabel: { fontSize: 12, color: "#666", marginTop: 4 },
+  statNumber: {
+    fontSize: 22,
+    fontWeight: "700",
+    color: "#3a2a25",
+    textAlign: "center",
+  },
+  statLabel: {
+    fontSize: 11,
+    color: "#644A07",
+    marginTop: 6,
+    textAlign: "center",
+  },
   row: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
     marginHorizontal: 20,
-    backgroundColor: "#f5f5f5",
+    backgroundColor: "#fff",
     borderRadius: 12,
     padding: 16,
     marginTop: 20,
   },
-  rowLabel: { fontSize: 15, fontWeight: "600", color: "#222" },
+  rowLabel: { fontSize: 15, fontWeight: "600", color: "#3a2a25" },
   logoutButton: {
     marginHorizontal: 20,
     marginTop: 20,
-    backgroundColor: "#c0392b",
+    backgroundColor: "#3a2a25",
     borderRadius: 10,
     paddingVertical: 14,
     alignItems: "center",
   },
   logoutButtonText: { color: "#fff", fontWeight: "700" },
+
+  secretReset: {
+    marginTop: 15,
+    alignSelf: "center",
+    padding: 10,
+    opacity: 0,
+  },
 });

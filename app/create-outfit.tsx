@@ -12,6 +12,7 @@ import {
   TextInput,
   View,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { getClothingItems, groupByCategory } from "../services/clothing";
 import { addItemToOutfit, createOutfit } from "../services/outfits";
 import { ClothingItem } from "../types/database";
@@ -80,7 +81,7 @@ export default function CreateOutfitScreen() {
   if (loadingItems) {
     return (
       <View style={styles.centered}>
-        <ActivityIndicator size="large" />
+        <ActivityIndicator size="large" color="#3a2a25" />
       </View>
     );
   }
@@ -89,180 +90,268 @@ export default function CreateOutfitScreen() {
   const categories = Object.keys(grouped);
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      <ThemedText style={styles.title}>Kreiraj autfit</ThemedText>
-
-      <ThemedText style={styles.label}>Datum</ThemedText>
-      <Pressable
-        style={styles.dateButton}
-        onPress={() => setShowDatePicker(true)}
+    <SafeAreaView style={styles.screen} edges={["top", "left", "right"]}>
+      <ScrollView
+        contentContainerStyle={styles.container}
+        showsVerticalScrollIndicator={false}
       >
-        <ThemedText style={styles.dateButtonText}>{datum}</ThemedText>
-      </Pressable>
+        <Pressable onPress={() => router.back()} style={styles.backButton}>
+          <ThemedText style={styles.backButtonText}>{"‹ Nazad"}</ThemedText>
+        </Pressable>
+        <ThemedText style={styles.title}>Kreiraj autfit</ThemedText>
 
-      {showDatePicker && (
-        <DateTimePicker
-          value={new Date(datum)}
-          mode="date"
-          display="default"
-          onChange={(event, selectedDate) => {
-            setShowDatePicker(false);
-            if (selectedDate) {
-              setDatum(selectedDate.toISOString().split("T")[0]);
-            }
-          }}
-        />
-      )}
+        <ThemedText style={styles.label}>Datum</ThemedText>
+        <Pressable
+          style={styles.dateButton}
+          onPress={() => setShowDatePicker(true)}
+        >
+          <ThemedText style={styles.dateButtonText}>{datum}</ThemedText>
+        </Pressable>
 
-      <ThemedText style={styles.label}>Naziv (opciono)</ThemedText>
-      <TextInput
-        style={styles.input}
-        placeholder="npr. Casual petak"
-        placeholderTextColor="#888"
-        value={naziv}
-        onChangeText={setNaziv}
-      />
-
-      <ThemedText style={styles.label}>Napomena (opciono)</ThemedText>
-      <TextInput
-        style={styles.input}
-        placeholder="npr. Za sastanak posle podne"
-        placeholderTextColor="#888"
-        value={napomena}
-        onChangeText={setNapomena}
-      />
-
-      <ThemedText style={styles.label}>
-        Izaberi odeću ({selectedIds.length} izabrano)
-      </ThemedText>
-
-      {clothingItems.length === 0 ? (
-        <ThemedText style={styles.emptyText}>
-          Orman je prazan — dodaj prvo neku odeću u "Moj orman".
-        </ThemedText>
-      ) : (
-        categories.map((category) => (
-          <View key={category} style={styles.categorySection}>
-            <ThemedText style={styles.categoryTitle}>{category}</ThemedText>
-            <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-              {grouped[category].map((item) => {
-                const isSelected = selectedIds.includes(item.id);
-                return (
-                  <Pressable
-                    key={item.id}
-                    style={[
-                      styles.itemCard,
-                      isSelected && styles.itemCardSelected,
-                    ]}
-                    onPress={() => toggleSelect(item.id)}
-                  >
-                    {item.image_url ? (
-                      <Image
-                        source={{ uri: item.image_url }}
-                        style={styles.itemImage}
-                      />
-                    ) : (
-                      <View
-                        style={[styles.itemImage, styles.itemImagePlaceholder]}
-                      >
-                        <ThemedText style={{ fontSize: 10 }}>
-                          Bez slike
-                        </ThemedText>
-                      </View>
-                    )}
-                    <ThemedText numberOfLines={1} style={styles.itemName}>
-                      {item.naziv}
-                    </ThemedText>
-                    {isSelected && <View style={styles.checkmark} />}
-                  </Pressable>
-                );
-              })}
-            </ScrollView>
-          </View>
-        ))
-      )}
-
-      <Pressable
-        style={styles.saveButton}
-        onPress={handleSave}
-        disabled={saving}
-      >
-        {saving ? (
-          <ActivityIndicator color="#fff" />
-        ) : (
-          <ThemedText style={styles.saveButtonText}>Sačuvaj autfit</ThemedText>
+        {showDatePicker && (
+          <DateTimePicker
+            value={new Date(datum)}
+            mode="date"
+            display="default"
+            onChange={(event, selectedDate) => {
+              setShowDatePicker(false);
+              if (selectedDate) {
+                setDatum(selectedDate.toISOString().split("T")[0]);
+              }
+            }}
+          />
         )}
-      </Pressable>
-    </ScrollView>
+
+        <ThemedText style={styles.label}>Naziv (opciono)</ThemedText>
+        <TextInput
+          style={styles.input}
+          placeholder="npr. Casual petak"
+          placeholderTextColor="#644A0766"
+          value={naziv}
+          onChangeText={setNaziv}
+        />
+
+        <ThemedText style={styles.label}>Napomena (opciono)</ThemedText>
+        <TextInput
+          style={styles.input}
+          placeholder="npr. Za sastanak posle podne"
+          placeholderTextColor="#644A0766"
+          value={napomena}
+          onChangeText={setNapomena}
+        />
+
+        <ThemedText style={styles.label}>
+          Izaberi odeću ({selectedIds.length} izabrano)
+        </ThemedText>
+
+        {clothingItems.length === 0 ? (
+          <ThemedText style={styles.emptyText}>
+            Orman je prazan — dodaj prvo neku odeću u "Moj orman".
+          </ThemedText>
+        ) : (
+          categories.map((category) => (
+            <View key={category} style={styles.categorySection}>
+              <ThemedText style={styles.categoryTitle}>{category}</ThemedText>
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={{ paddingRight: 16 }}
+              >
+                {grouped[category].map((item) => {
+                  const isSelected = selectedIds.includes(item.id);
+                  return (
+                    <Pressable
+                      key={item.id}
+                      style={[
+                        styles.itemCard,
+                        isSelected && styles.itemCardSelected,
+                      ]}
+                      onPress={() => toggleSelect(item.id)}
+                    >
+                      {item.image_url ? (
+                        <Image
+                          source={{ uri: item.image_url }}
+                          style={styles.itemImage}
+                        />
+                      ) : (
+                        <View
+                          style={[
+                            styles.itemImage,
+                            styles.itemImagePlaceholder,
+                          ]}
+                        >
+                          <ThemedText
+                            style={{ fontSize: 10, color: "#3a2a25" }}
+                          >
+                            Bez slike
+                          </ThemedText>
+                        </View>
+                      )}
+                      <ThemedText numberOfLines={1} style={styles.itemName}>
+                        {item.naziv}
+                      </ThemedText>
+                      {isSelected && <View style={styles.checkmark} />}
+                    </Pressable>
+                  );
+                })}
+              </ScrollView>
+            </View>
+          ))
+        )}
+
+        <Pressable
+          style={styles.saveButton}
+          onPress={handleSave}
+          disabled={saving}
+        >
+          {saving ? (
+            <ActivityIndicator color="#FFDBDB" />
+          ) : (
+            <ThemedText style={styles.saveButtonText}>
+              Sačuvaj autfit
+            </ThemedText>
+          )}
+        </Pressable>
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  centered: { flex: 1, justifyContent: "center", alignItems: "center" },
-  container: { padding: 20, paddingBottom: 40 },
+  screen: {
+    flex: 1,
+    backgroundColor: "#FFDBDB",
+  },
+  centered: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#FFDBDB",
+  },
+  container: {
+    padding: 20,
+    paddingBottom: 40,
+  },
+  backButton: {
+    marginBottom: 12,
+    alignSelf: "flex-start",
+  },
+  backButtonText: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#3a2a25",
+  },
   title: {
-    fontSize: 22,
+    fontSize: 24,
     fontWeight: "700",
     textAlign: "center",
-    marginBottom: 20,
+    marginBottom: 24,
+    color: "#3a2a25",
   },
-  label: { fontWeight: "600", marginBottom: 6, marginTop: 10 },
+  label: {
+    fontWeight: "700",
+    marginBottom: 8,
+    marginTop: 16,
+    color: "#3a2a25",
+    fontSize: 15,
+  },
   input: {
     borderWidth: 1,
-    borderColor: "#ddd",
-    borderRadius: 8,
-    padding: 10,
-    marginBottom: 4,
-    backgroundColor: "#fff",
-    color: "#000",
-  },
-  dateButton: {
-    borderWidth: 1,
-    borderColor: "#ddd",
-    borderRadius: 8,
+    borderColor: "#FFC6C6",
+    borderRadius: 12,
     padding: 12,
     marginBottom: 4,
     backgroundColor: "#fff",
+    color: "#3a2a25",
+    fontSize: 15,
   },
-  dateButtonText: { color: "#000", fontSize: 16 },
-  emptyText: { color: "#888", marginTop: 8 },
-  categorySection: { marginTop: 14 },
-  categoryTitle: { fontSize: 15, fontWeight: "700", marginBottom: 8 },
+  dateButton: {
+    borderWidth: 1,
+    borderColor: "#FFC6C6",
+    borderRadius: 12,
+    padding: 14,
+    marginBottom: 4,
+    backgroundColor: "#fff",
+  },
+  dateButtonText: {
+    color: "#3a2a25",
+    fontSize: 15,
+    fontWeight: "600",
+  },
+  emptyText: {
+    color: "#644A07",
+    marginTop: 8,
+    fontSize: 14,
+  },
+  categorySection: {
+    marginTop: 16,
+  },
+  categoryTitle: {
+    fontSize: 16,
+    fontWeight: "700",
+    marginBottom: 10,
+    color: "#3a2a25",
+  },
   itemCard: {
-    width: 100,
-    marginRight: 10,
-    padding: 6,
-    borderRadius: 10,
-    backgroundColor: "#f5f5f5",
+    width: 106,
+    marginRight: 12,
+    padding: 8,
+    borderRadius: 14,
+    backgroundColor: "#fff",
     borderWidth: 2,
-    borderColor: "transparent",
+    borderColor: "#FFC6C6",
     position: "relative",
+    shadowColor: "#3a2a25",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 2,
   },
   itemCardSelected: {
     borderColor: "#3a2a25",
   },
-  itemImage: { width: "100%", height: 90, borderRadius: 6, marginBottom: 4 },
+  itemImage: {
+    width: "100%",
+    height: 90,
+    borderRadius: 8,
+    marginBottom: 6,
+  },
   itemImagePlaceholder: {
-    backgroundColor: "#ddd",
+    backgroundColor: "#FFC6C6",
     justifyContent: "center",
     alignItems: "center",
   },
-  itemName: { fontSize: 11, color: "#333" },
+  itemName: {
+    fontSize: 12,
+    color: "#3a2a25",
+    fontWeight: "600",
+  },
   checkmark: {
     position: "absolute",
-    top: 4,
-    right: 4,
-    width: 14,
-    height: 14,
-    borderRadius: 7,
+    top: 6,
+    right: 6,
+    width: 16,
+    height: 16,
+    borderRadius: 8,
     backgroundColor: "#3a2a25",
+    borderWidth: 2,
+    borderColor: "#fff",
   },
   saveButton: {
-    marginTop: 24,
+    marginTop: 32,
     backgroundColor: "#3a2a25",
-    borderRadius: 10,
+    borderRadius: 14,
     paddingVertical: 14,
     alignItems: "center",
+    elevation: 3,
+    shadowColor: "#3a2a25",
+    shadowOpacity: 0.15,
+    shadowRadius: 4,
+    shadowOffset: { width: 0, height: 2 },
   },
-  saveButtonText: { color: "#fff", fontWeight: "700" },
+  saveButtonText: {
+    color: "#FFDBDB",
+    fontWeight: "700",
+    fontSize: 16,
+  },
 });

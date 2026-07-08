@@ -1,5 +1,5 @@
 import { useOnboarding } from "@/contexts/OnboardingContext";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { Image, Pressable, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function OnboardingScreen() {
@@ -12,9 +12,11 @@ export default function OnboardingScreen() {
   return (
     <View style={styles.container}>
       <SafeAreaView style={styles.content}>
-        <View style={styles.imagePlaceholder}>
-          <Text style={styles.emoji}>👗</Text>
-        </View>
+        <Image
+          source={require("../assets/images/splash-icon.png")}
+          style={styles.logo}
+          resizeMode="contain"
+        />
 
         <Text style={styles.title}>Digitalni Orman</Text>
         <Text style={styles.subtitle}>
@@ -38,16 +40,11 @@ const styles = StyleSheet.create({
     alignItems: "center",
     padding: 32,
   },
-  imagePlaceholder: {
-    width: 160,
-    height: 160,
-    borderRadius: 80,
-    backgroundColor: "rgba(255,255,255,0.1)",
-    justifyContent: "center",
-    alignItems: "center",
-    marginBottom: 32,
+  logo: {
+    width: 220,
+    height: 220,
+    marginBottom: 20,
   },
-  emoji: { fontSize: 70 },
   title: {
     fontSize: 28,
     fontWeight: "700",
