@@ -236,7 +236,7 @@ const styles = StyleSheet.create({
     color: "#3a2a25",
     fontWeight: "700",
     textDecorationLine: "underline",
-  }, // Sada je vidljivo i podvučeno
+  },
   editInput: {
     width: "100%",
     borderWidth: 1,

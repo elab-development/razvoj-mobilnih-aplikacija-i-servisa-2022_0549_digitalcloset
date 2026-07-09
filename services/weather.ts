@@ -22,21 +22,17 @@ function describeWeatherCode(code: number): string {
 export { describeWeatherCode };
 
 export async function getCurrentWeather(): Promise<WeatherData> {
-  // 1. Trazi dozvolu za lokaciju
   const { status } = await Location.requestForegroundPermissionsAsync();
   if (status !== "granted") {
     throw new Error("Dozvola za lokaciju nije odobrena.");
   }
 
-  // 2. Uzmi trenutnu lokaciju uredjaja
   const location = await Location.getCurrentPositionAsync({});
   const { latitude, longitude } = location.coords;
 
-  // 3. Reverse geocoding - dobij ime grada iz koordinata
   const geocode = await Location.reverseGeocodeAsync({ latitude, longitude });
   const city = geocode[0]?.city ?? geocode[0]?.region ?? "Nepoznata lokacija";
 
-  // 4. Pozovi Open-Meteo API (besplatan, bez API kljuca) za trenutno vreme
   const response = await fetch(
     `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,weather_code`,
   );
@@ -63,7 +59,7 @@ export function getWeatherEmoji(code: number): string {
   if ([95, 96, 99].includes(code)) return "⛈️";
   return "🌡️";
 }
-// Vraca listu sezona koje odgovaraju datoj temperaturi (mogu se preklapati)
+
 export function getSeasonsForTemperature(temp: number): string[] {
   const seasons: string[] = [];
 

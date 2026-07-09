@@ -1,7 +1,6 @@
 import * as Notifications from "expo-notifications";
 import { Platform } from "react-native";
 
-// Podesi kako se notifikacije ponasaju dok je aplikacija otvorena
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
     shouldShowAlert: true,
@@ -12,7 +11,6 @@ Notifications.setNotificationHandler({
   }),
 });
 
-// Trazi dozvolu za notifikacije (obavezno na iOS, dobra praksa i na Android)
 export async function requestNotificationPermission(): Promise<boolean> {
   const { status: existingStatus } = await Notifications.getPermissionsAsync();
   let finalStatus = existingStatus;
@@ -32,7 +30,6 @@ export async function requestNotificationPermission(): Promise<boolean> {
   return finalStatus === "granted";
 }
 
-// Posalji trenutnu (instant) notifikaciju - koristimo za potvrdu uspesne akcije
 export async function sendInstantNotification(title: string, body: string) {
   await Notifications.scheduleNotificationAsync({
     content: { title, body },
@@ -40,12 +37,10 @@ export async function sendInstantNotification(title: string, body: string) {
   });
 }
 
-// Zakazi dnevni podsetnik za planiranje autfita (svako vece u odredjeni sat)
 export async function scheduleDailyOutfitReminder(
   hour: number = 20,
   minute: number = 0,
 ) {
-  // Prvo obrisi eventualne stare zakazane podsetnike da ne dupliramo
   await Notifications.cancelAllScheduledNotificationsAsync();
 
   await Notifications.scheduleNotificationAsync({
@@ -61,7 +56,6 @@ export async function scheduleDailyOutfitReminder(
   });
 }
 
-// Otkazi sve zakazane notifikacije (npr. ako korisnik iskljuci podsetnike)
 export async function cancelAllReminders() {
   await Notifications.cancelAllScheduledNotificationsAsync();
 }
